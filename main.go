@@ -32,6 +32,10 @@ func sanitizeFilename(filename string) string {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request){
+	
+	// handle file size limit to 100MB
+	r.Body = http.MaxBytesReader(w, r.Body, 100<<20)
+
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
