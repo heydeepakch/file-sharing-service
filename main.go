@@ -10,6 +10,7 @@ import (
 func main(){
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/upload", uploadHandler)
+	http.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("uploads"))))
 	fmt.Println("Server is running on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
@@ -35,6 +36,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	link := "http://localhost:8080/files/" + header.Filename
+	fmt.Fprintln(w, "File uploaded successfully.\n\n Download Link:\n", link)
+
 	fmt.Println ("Uploaded File: ", header.Filename)
-	fmt.Fprintln(w, "Upload Successful")
 }
