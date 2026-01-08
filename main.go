@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"strings"
 	"regexp"
+	"path/filepath"
 )
 
 func main(){
@@ -31,8 +32,20 @@ func sanitizeFilename(filename string) string {
     return filename
 }
 
+func isAllowedFileType(filename string) bool {
+    allowedExtensions := []string{".pdf", ".jpg", ".jpeg", ".png", ".gif", ".zip"}
+    
+    ext := strings.ToLower(filepath.Ext(filename))
+    for _, allowed := range allowedExtensions {
+        if ext == allowed {
+            return true
+        }
+    }
+    return false
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request){
-	
+
 	// handle file size limit to 100MB
 	r.Body = http.MaxBytesReader(w, r.Body, 100<<20)
 
@@ -42,6 +55,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}	
 	defer file.Close()
+
+	if !isAllowedFileType(header.Filename) {
+		http.Error(w, "Unsupported file type", http.StatusUnsupportedMediaType)
+		return
+	}
 
 	id := uuid.New().String()
 	safeFilename := id + "_" + sanitizeFilename(header.Filename)
