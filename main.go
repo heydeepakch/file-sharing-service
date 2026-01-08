@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"io"
 )
 
 func main(){
@@ -19,6 +21,20 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}	
 	defer file.Close()
+
+	dst, err := os.Create("uploads/" + header.Filename)
+	if err != nil{
+		http.Error(w, "Unable to create file", http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, file)
+	if err != nil{
+		http.Error(w, "Unable to copy file", http.StatusInternalServerError)
+		return
+	}
+
 	fmt.Println ("Uploaded File: ", header.Filename)
 	fmt.Fprintln(w, "Upload Successful")
 }
