@@ -6,6 +6,8 @@ import (
 	"os"
 	"io"
 	"github.com/google/uuid"
+	"strings"
+	"regexp"
 )
 
 func main(){
@@ -21,6 +23,14 @@ func main(){
 	http.ListenAndServe(":8080", nil)
 }
 
+func sanitizeFilename(filename string) string {
+    filename = strings.ReplaceAll(filename, " ", "_")
+    reg := regexp.MustCompile(`[^a-zA-Z0-9._-]`)
+    filename = reg.ReplaceAllString(filename, "")
+    
+    return filename
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request){
 	file, header, err := r.FormFile("file")
 	if err != nil {
@@ -30,7 +40,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 	defer file.Close()
 
 	id := uuid.New().String()
-	safeFilename := id + "_" + header.Filename
+	safeFilename := id + "_" + sanitizeFilename(header.Filename)
 
 	dst, err := os.Create("uploads/" + safeFilename)
 	if err != nil{
