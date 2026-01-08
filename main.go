@@ -8,6 +8,11 @@ import (
 )
 
 func main(){
+	err := os.MkdirAll("uploads", 0755)
+    if err != nil {
+        fmt.Println("Error creating uploads directory:", err)
+        return
+    }
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/upload", uploadHandler)
 	http.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("uploads"))))
