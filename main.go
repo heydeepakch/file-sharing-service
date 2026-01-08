@@ -15,6 +15,9 @@ import (
 var fileDB = make(map[string]FileMeta)
 
 func main(){
+
+	loadDB()
+
 	err := os.MkdirAll("uploads", 0755)
     if err != nil {
         fmt.Println("Error creating uploads directory:", err)
@@ -100,6 +103,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 		Size: header.Size,
 		UploadedAt: time.Now(),
 	}
+
+	saveDB()
 
 	link := "http://localhost:8080/download/" + publicID
 	fmt.Fprintln(w, "File uploaded successfully.\n\n Download Link:\n", link)
