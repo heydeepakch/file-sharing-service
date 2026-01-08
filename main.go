@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"io"
+	"github.com/google/uuid"
 )
 
 func main(){
@@ -28,7 +29,10 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 	}	
 	defer file.Close()
 
-	dst, err := os.Create("uploads/" + header.Filename)
+	id := uuid.New().String()
+	safeFilename := id + "_" + header.Filename
+
+	dst, err := os.Create("uploads/" + safeFilename)
 	if err != nil{
 		http.Error(w, "Unable to create file", http.StatusInternalServerError)
 		return
@@ -41,7 +45,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	link := "http://localhost:8080/files/" + header.Filename
+	link := "http://localhost:8080/files/" + safeFilename
 	fmt.Fprintln(w, "File uploaded successfully.\n\n Download Link:\n", link)
 
 	fmt.Println ("Uploaded File: ", header.Filename)
